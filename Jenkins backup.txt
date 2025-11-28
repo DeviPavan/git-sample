@@ -1,0 +1,60 @@
+Jenkins backup:
+1. Create a new server and install jenkins on it
+2. Create some jobs on the jenkins server
+
+3. Create an S3 bucket on AWS to store the back up of jenkins directory - jenkins-backup-18feb
+-->Go to AWS dashboard-->search option give S3-->
+
+TO allow AWS ec2 server to write into AWS s3 bucket we need to
+
+> Create a IAM role for amazons3fullaccess for EC2
+
+> Attach the role to jenkins Ec2 server-->actions-->security-->IAM role
+
+
+Now stop jenkins server from terminal
+====================================
+# systemctl stop jenkins
+
+# tar -zcvf jenkins-backup.tar.gz /var/lib/jenkins
+# ls
+Install Aws cli
+# apt-get update && apt install awscli -y 
+
+Run the command to send the tar file to s3 bucket.
+
+# aws s3 cp jenkins-backup.tar.gz s3://jenkins-backup-demo/jenkins-backup.tar.gz
+
+Error:eading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Package awscli is not available, but is referred to by another package.
+This may mean that the package is missing, has been obsoleted, or
+is only available from another source
+
+E: Package 'awscli' has no installation candidate
+solution:
+You're getting the error because the awscli package is not available in your default APT sources. This commonly happens on older or minimal Debian/Ubuntu-based AMIs (especially on EC2).
+
+To fix it, follow these steps:
+
+1. Update package list
+
+# sudo apt update
+
+2. Install required dependencies
+
+# sudo apt install -y curl unzip
+
+3. Manually install AWS CLI v2
+
+# curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+# unzip awscliv2.zip
+# sudo ./aws/install
+4. Verify installation
+
+# aws --version
+
+Expected output (example):
+aws-cli/2.15.12 Python/3.11.5 Linux/x86_64 exe/x86_64.ubuntu
+
